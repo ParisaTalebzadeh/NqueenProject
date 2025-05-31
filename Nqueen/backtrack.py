@@ -1,4 +1,4 @@
-import copy
+
 import random
 
 def solve_n_queens_backtracking(n):

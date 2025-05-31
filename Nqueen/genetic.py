@@ -1,85 +1,113 @@
+import numpy as np
 import random
 
-def solve_n_queens_genetic(nq):
-    def random_chromosome(size):
-        return [random.randint(0, nq - 1) for _ in range(nq)]
-
-    def fitness(chromosome):
-        horizontal_collisions = sum([chromosome.count(queen) - 1 for queen in chromosome]) / 2
-        diagonal_collisions = 0
-        n = len(chromosome)
-        left_diagonal = [0] * 2 * n
-        right_diagonal = [0] * 2 * n
+def check_fitness(population: np.ndarray) -> np.ndarray:
+    pop_size, n = population.shape
+    fitness = np.zeros(pop_size, dtype=int)
+    for idx, solution in enumerate(population):
+        conflicts = 0
         for i in range(n):
-            left_diagonal[i + chromosome[i] - 1] += 1
-            right_diagonal[len(chromosome) - i + chromosome[i] - 2] += 1
-        diagonal_collisions = 0
-        for i in range(2 * n - 1):
-            counter = 0
-            if left_diagonal[i] > 1:
-                counter += left_diagonal[i] - 1
-            if right_diagonal[i] > 1:
-                counter += right_diagonal[i] - 1
-            diagonal_collisions += counter / (n - abs(i - n + 1))
-        return int(maxFitness - (horizontal_collisions + diagonal_collisions))
+            for j in range(i + 1, n):
+                if abs(solution[i] - solution[j]) == abs(i - j):
+                    conflicts += 1
+        fitness[idx] = conflicts
+    return fitness
 
-    def probability(chromosome):
-        return fitness(chromosome) / maxFitness
+def tournament_selection(pop: np.ndarray,
+                         fit: np.ndarray,
+                         k: int = 3) -> np.ndarray:
+    pop_size = pop.shape[0]
+    candidates = np.random.choice(pop_size, size=k, replace=False)
+    best = candidates[0]
+    for idx in candidates[1:]:
+        if fit[idx] < fit[best]:
+            best = idx
+    return pop[best].copy()
 
-    def random_pick(population, probabilities):
-        total = sum(probabilities)
-        r = random.uniform(0, total)
-        upto = 0
-        for chromo, prob in zip(population, probabilities):
-            if upto + prob >= r:
-                return chromo
-            upto += prob
-        return population[0]  # fallback
+def order_crossover(parent1: np.ndarray,
+                    parent2: np.ndarray,
+                    cut_length: int) -> (np.ndarray, np.ndarray):
+    n = parent1.shape[0]
+    child1 = np.full(n, -1, dtype=int)
+    child2 = np.full(n, -1, dtype=int)
 
-    def reproduce(x, y):
-        n = len(x)
-        c = random.randint(0, n - 1)
-        return x[0:c] + y[c:n]
+    start = random.randint(0, n - cut_length)
+    end = start + cut_length
 
-    def mutate(x):
-        n = len(x)
-        c = random.randint(0, n - 1)
-        m = random.randint(0, n - 1)
-        x[c] = m
-        return x
+    child1[start:end] = parent1[start:end]
+    child2[start:end] = parent2[start:end]
 
-    def genetic_queen(population):
-        mutation_probability = 0.03
+    def fill_remaining(child: np.ndarray, donor: np.ndarray):
+        idx_fill = 0
+        for gene in donor:
+            if gene not in child:
+                while child[idx_fill] != -1:
+                    idx_fill += 1
+                child[idx_fill] = gene
+        return child
+
+    child1 = fill_remaining(child1, parent2)
+    child2 = fill_remaining(child2, parent1)
+    return child1, child2
+
+def swap_mutation(chromosome: np.ndarray,
+                  num_swaps: int = 1) -> np.ndarray:
+    child = chromosome.copy()
+    n = child.shape[0]
+    for _ in range(num_swaps):
+        i, j = np.random.choice(n, size=2, replace=False)
+        child[i], child[j] = child[j], child[i]
+    return child
+
+def solve_n_queens_genetic(n: int,
+                           pop_size: int = 500,
+                           generations: int = 2500,
+                           p_mutation: float = 0.2,
+                           tournament_k: int = 3,
+                           cut_length: int = 2,
+                           num_swaps: int = 1,
+                           elitism: bool = True) -> list:
+
+    population = np.zeros((pop_size, n), dtype=int)
+    for i in range(pop_size):
+        population[i, :] = np.random.permutation(n)
+
+    fitness = check_fitness(population)
+
+    for gen in range(1, generations + 1):
+        print(f"\n========== Generation {gen} Chromosomes ==========")
+        for sol in population:
+            print(sol.tolist())
+
+        best_idx = np.argmin(fitness)
+        best_solution = population[best_idx].copy()
+        best_conflicts = int(fitness[best_idx])
+        print(f"\n>>> Generation {gen}: Best conflicts = {best_conflicts} | Board = {best_solution.tolist()}")
+
+        if best_conflicts == 0:
+            print("\n solution found!")
+            return (best_solution + 1).tolist()
+
         new_population = []
-        probabilities = [probability(n) for n in population]
-        for i in range(len(population)):
-            x = random_pick(population, probabilities)
-            y = random_pick(population, probabilities)
-            child = reproduce(x, y)
-            if random.random() < mutation_probability:
-                child = mutate(child)
-            print("Chromosome = {},  Fitness = {}".format(str(child), fitness(child)))
-            new_population.append(child)
-            if fitness(child) == maxFitness:
-                break
-        return new_population
+        if elitism:
+            new_population.append(best_solution.copy())
 
-    maxFitness = (nq * (nq - 1)) / 2
-    population = [random_chromosome(nq) for _ in range(100)]
-    generation = 1
+        while len(new_population) < pop_size:
+            parent1 = tournament_selection(population, fitness, tournament_k)
+            parent2 = tournament_selection(population, fitness, tournament_k)
+            child1, child2 = order_crossover(parent1, parent2, cut_length)
+            if random.random() < p_mutation:
+                child1 = swap_mutation(child1, num_swaps)
+            if random.random() < p_mutation:
+                child2 = swap_mutation(child2, num_swaps)
+            new_population.append(child1)
+            if len(new_population) < pop_size:
+                new_population.append(child2)
 
-    while not maxFitness in [fitness(chrom) for chrom in population]:
-        print("=== Generation {} ===".format(generation))
-        population = genetic_queen(population)
-        print("Maximum Fitness = {}".format(max([fitness(n) for n in population])))
-        print("")
-        generation += 1
+        population = np.vstack(new_population)
+        fitness = check_fitness(population)
 
-    for chrom in population:
-        if fitness(chrom) == maxFitness:
-            print("Solved in Generation {}!".format(generation - 1))
-            print("One of the solutions:")
-            print("Chromosome = {},  Fitness = {}".format(str(chrom), fitness(chrom)))
-            return chrom
-
-    return None
+    best_idx = np.argmin(fitness)
+    print("\n Returning best found:")
+    final_best = population[best_idx]
+    return (final_best + 1).tolist()
