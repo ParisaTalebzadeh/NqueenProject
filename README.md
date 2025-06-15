@@ -1,95 +1,190 @@
-N-Queens Problem Solver
-A Python implementation solving the N-Queens puzzle using Backtracking and Genetic Algorithms, visualized with Tkinter GUI.
+---
+🧠 N-Queens Problem Solver
 
+A Python implementation solving the N-Queens puzzle using three approaches: Backtracking, Genetic Algorithms, and Constraint Satisfaction Problem (CSP) — all visualized with a Tkinter GUI.
+---
 📖 Overview
-The N-Queens problem requires placing N chess queens on an N×N board such that no two queens threaten each other. This project implements two distinct algorithms:
 
-Backtracking - Exhaustively finds all valid solutions.
+The N-Queens problem requires placing N chess queens on an N×N board such that no two queens threaten each other. That means no two queens can be on the same row, column, or diagonal.
 
-Genetic Algorithm - Uses evolutionary principles to find a valid solution efficiently.
-Solutions are visualized on an interactive chessboard via Tkinter.
+This project implements and visualizes three distinct algorithms:
 
+Backtracking – Exhaustively finds all valid solutions using DFS.
+
+Genetic Algorithm – Uses evolutionary strategies to quickly approximate a solution.
+
+CSP (Constraint Satisfaction Problem) – Models the problem declaratively using constraints and solves using a CSP solver.
+
+
+All results are visualized on an interactive chessboard via a Tkinter-based GUI.
+
+---
 ⚙️ Features
-Backtracking Algorithm
 
-Finds all possible solutions for N queens.
+✅ Backtracking Algorithm
 
-Demonstrates DFS traversal with backtracking.
+Exhaustive search to find all valid configurations.
 
-Genetic Algorithm
+Implements Depth-First Search (DFS) with backtracking.
 
-Tournament selection, order crossover, and swap mutation.
+Clearly illustrates the algorithmic search process.
 
-Configurable parameters (population size, mutation rate, etc.).
+🧬 Genetic Algorithm
 
-Tkinter GUI
+Uses evolutionary computation:
 
-Visualizes queens on a colored chessboard.
+Tournament selection, order crossover, swap mutation.
 
-Toggle between backtracking/genetic solutions.
+Parameters are configurable (population size, mutation rate, etc.).
+
+Stops on solution discovery or max generations.
+
+
+🧩 CSP (Constraint Satisfaction Problem)
+
+Elegant declarative solution using Python-constraint library.
+
+Models the board as variables with:
+
+AllDifferent constraint for row/column uniqueness.
+
+Diagonal constraints using lambda functions.
+
+
+Efficiently finds a single valid solution.
+
+
+🖼️ Tkinter GUI
+
+Interactive GUI for entering N and choosing algorithm.
+
+Color-coded chessboard with visual queen placement.
+
+Toggle between Backtracking, Genetic, or CSP.
 
 Dynamic board resizing for any N.
 
+---
+
 🧠 Algorithms
-1. Backtracking
-Approach: Depth-First Search (DFS) with backtracking.
+
+🔁 Backtracking Approach
+
+A classic recursive solution using DFS.
 
 Key Functions:
 
-is_safe(): Checks queen placement validity.
+is_safe(row, col): Verifies whether a queen can be placed.
 
-solve(): Recursively places queens column-wise.
+solve(col): Recursively places queens column-wise.
 
-Output: All valid board configurations.
 
-2. Genetic Algorithm
-Workflow:
+Output: List of all valid board configurations.
 
-Initialization: Random population generation.
+---
 
-Fitness Calculation: Counts diagonal conflicts.
+🧬 Genetic Algorithm Workflow
 
-Selection: Tournament selection for parents.
+Initialization: Random generation of candidate solutions.
 
-Crossover: Order crossover to produce offspring.
+Fitness Evaluation: Fewer diagonal conflicts = higher fitness.
 
-Mutation: Random swaps with probability p_mutation.
+Selection: Tournament selection for parent candidates.
 
-Exit Condition: Zero conflicts or max generations reached.
+Crossover: Order crossover (OX) to produce offspring.
+
+Mutation: Swap mutation with a small probability.
+
+Termination: Stop when a solution has zero conflicts or after max generations.
+
+---
+
+🧩 Constraint Satisfaction Problem (CSP) Approach
+
+Solves the N-Queens problem by declaring constraints instead of writing search logic.
+
+Steps:
+
+1. Each column is a variable (value = row index of queen).
+
+
+2. Apply AllDifferentConstraint() to ensure no two queens share a row.
+
+
+3. Add diagonal constraints using:
+
+
+
+def no_diagonal_factory(c1, c2):
+    def no_diagonal(q1, q2):
+        return abs(q1 - q2) != abs(c1 - c2)
+    return no_diagonal
+
+4. Solve with problem.getSolution() to obtain one valid placement.
+
+Advantages:
+
+Clean and scalable.
+
+Leverages a CSP solver for constraint propagation and inference.
+
+---
 
 🛠️ Requirements
+
 Python 3.x
 
-Libraries: numpy, tkinter
+Libraries:
+
+numpy
+
+tkinter (comes with Python)
+
+python-constraint (for CSP)
+
+
+
+Install required packages via:
+
+pip install numpy python-constraint
+
+
+---
 
 🚀 Installation & Usage
-Clone the repository:
 
-bash
-git clone https://github.com/<your-username>/n-queens-solver.git  
-cd n-queens-solver  
-Run the program:
+1. Clone the repository:
 
-bash
-python n_queens_gui.py  
-GUI Instructions
-Enter N (e.g., 4, 8, 10).
+
+
+git clone https://github.com/yourusername/n-queens-solver.git
+cd n-queens-solver
+
+2. Run the GUI:
+
+python n_queens_gui.py
+---
+
+🖱️ GUI Instructions
+
+Enter the value of N (e.g., 4, 8, 10).
 
 Select an algorithm:
 
-Backtracking: Displays all solutions (use arrows to navigate).
+Backtracking: Shows all solutions (navigate with arrows).
 
-Genetic: Shows solution evolution per generation.
+Genetic: Shows live evolution of a solution.
 
-Click Solve to visualize!
+CSP: Shows a single valid solution quickly.
 
-🖼️ Sample GUI Output
-Backtracking Solution (N=8)	Genetic Algorithm Evolution
-Backtracking Solution	Genetic Algorithm
+
+Click Solve to visualize the solution on the chessboard!
+
+---
+
 📄 Code Structure
-n_queens_backtracking.py: Backtracking implementation.
 
-n_queens_genetic.py: Genetic algorithm implementation.
-
-n_queens_gui.py: Tkinter GUI for visualization.
-
+n_queens_backtracking.py   # Backtracking logic
+n_queens_genetic.py        # Genetic algorithm logic
+n_queens_gui.py            # GUI and visualization logic
+n_queens_csp.py            # CSP solver implementation
