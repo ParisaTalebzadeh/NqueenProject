@@ -184,7 +184,7 @@ Click Solve to visualize the solution on the chessboard!
 
 📄 Code Structure
 
-backtracking.py   # Backtracking logic
-genetic.py     # Genetic algorithm logic
-board_gui.py         # GUI and visualization logic
-csp_solver.py       # CSP solver implementation
+backtracking.py -> Backtracking logic|
+genetic.py -> Genetic algorithm logic|
+board_gui.py -> GUI and visualization logic|
+csp_solver.py -> CSP solver implementation
