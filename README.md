@@ -162,7 +162,7 @@ cd n-queens-solver
 
 2. Run the GUI:
 
-python n_queens_gui.py
+python board_gui.py
 ---
 
 🖱️ GUI Instructions
@@ -184,7 +184,11 @@ Click Solve to visualize the solution on the chessboard!
 
 📄 Code Structure
 
-n_queens_backtracking.py   # Backtracking logic
-n_queens_genetic.py        # Genetic algorithm logic
-n_queens_gui.py            # GUI and visualization logic
-n_queens_csp.py            # CSP solver implementation
+backtracking.py 
+# Backtracking logic
+genetic.py     
+# Genetic algorithm logic
+board_gui.py         
+# GUI and visualization logic
+csp_solver.py       
+# CSP solver implementation
