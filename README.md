@@ -1,8 +1,8 @@
----
+
 🧠 N-Queens Problem Solver
 
 A Python implementation solving the N-Queens puzzle using three approaches: Backtracking, Genetic Algorithms, and Constraint Satisfaction Problem (CSP) — all visualized with a Tkinter GUI.
----
+
 📖 Overview
 
 The N-Queens problem requires placing N chess queens on an N×N board such that no two queens threaten each other. That means no two queens can be on the same row, column, or diagonal.
